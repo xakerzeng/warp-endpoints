@@ -1,0 +1,44 @@
+name: Discover Available WARP Endpoints
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 13 * * 1'
+
+permissions:
+  contents: write
+
+jobs:
+  discover-warp-endpoints:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get latest release tag
+        id: get_release
+        run: |
+          tag=$(curl -s https://api.github.com/repos/peanut996/CloudflareWarpSpeedTest/releases/latest | jq -r .tag_name)
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+
+      - name: Download CloudflareWarpSpeedTest
+        run: |
+          wget -qO warp.tar.gz https://github.com/peanut996/CloudflareWarpSpeedTest/releases/download/${{ steps.get_release.outputs.tag }}/CloudflareWarpSpeedTest-${{ steps.get_release.outputs.tag }}-linux-amd64.tar.gz
+          tar -xzf warp.tar.gz
+          chmod +x CloudflareWarpSpeedTest
+
+      - name: Run CloudflareWarpSpeedTest
+        run: |
+          ./CloudflareWarpSpeedTest -ip 162.159.192.0/24,162.159.195.0/24,188.114.96.0/24,188.114.97.0/24,188.114.98.0/24,188.114.99.0/24,8.47.69.0/24 -all -n 500 -t 3
+
+      - name: Create README.md
+        run: python create_readme.py
+
+      - name: Commit and push README.md
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "🔄 Update README with latest WARP endpoints" || echo "No changes to commit"
+          git push
