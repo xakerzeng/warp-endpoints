@@ -1,6 +1,7 @@
 import csv
 from dataclasses import dataclass
 from ipaddress import IPv4Address
+import re
 
 RESULT_FILENAME = 'result.csv'
 README_HEADER = (
@@ -58,11 +59,14 @@ def create_readme(endpoints: dict[str, list[CloudflareEndpoint]]) -> None:
     readme = README_HEADER
 
     readme += f'### 🗂️ Number of IP Pools: {len(endpoints.keys())}\n'
+    for network in endpoints.keys():
+        readme += f'* [{network}](#pool-{re.sub('[^0-9]+', '',network)})\n'
     readme += f'### 🔢 Total Number of Endpoints: {sum(len(endpoint) for endpoint in endpoints.values())}\n\n'
     readme += '---\n'
 
     for network, endpoints in endpoints.items():
-        readme += f'### Pool: `{network}` Available: {len(endpoints)}\n'
+        readme += f'### Pool: `{network}`\n'
+        readme += f'**Available: {len(endpoints)}**\n\n'
         readme += MARKDOWN_TABLE_HEADER
         for endpoint in endpoints:
             readme += endpoint.markdown_table_row
