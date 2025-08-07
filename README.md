@@ -2,9 +2,6 @@
 
 A repository containing a list of endpoints, grouped by IP pools, available for connecting to the **Cloudflare WARP** service.
 
-> 🙏 Special thanks to [peanut996](https://github.com/peanut996/CloudflareWarpSpeedTest) for providing the testing tool.
-
----
 
 ## 📊 Table of Available IP Addresses by Pool
 
